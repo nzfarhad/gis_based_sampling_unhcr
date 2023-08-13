@@ -1,6 +1,6 @@
 library(sf)
 
-# Microsoft building footprint directory path
+# Microsoft building footprint geojson files directory path 
 folder_path <- "input/afg_microsoft_building_footprints"
 
 # List all GeoJSON files
