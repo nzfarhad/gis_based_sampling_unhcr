@@ -89,12 +89,17 @@ make_grid <- function(poly, cell_size = 100, my_crs = 32642) {
     st_sf %>% 
     st_filter(my_polygon, .predicate = st_intersects) %>% 
     st_transform(crs = 4326)
+  grid$Shape_Length <- round(as.numeric(st_length(grid$geometry)))
+  grid$Shape_Area <- round(as.numeric(st_area(grid$geometry)))
   return(grid)
 }
 
+
+
+
 # Count population per grid
-count_ppp <- function(){
-  count <- vector(my_grid, my_raster)
+count_ppp <- function(my_grid, my_raster){
+  count <- vector()
   for (i in 1:nrow(grid)) {
     cropped_raster <- raster::crop(my_raster, extent(st_sf(my_grid$geometry[i])))
     masked_raster <- raster::mask(cropped_raster, st_sf(my_grid$geometry[i]))
