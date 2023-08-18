@@ -140,20 +140,26 @@ count_ppp <- function(my_grid, my_raster){
 
 
 
-calculate_population_per_grid <- function(my_grid, my_buildings){
+calculate_building_area_per_grid <- function(my_grid, my_buildings){
   
   grid_area <- vector()
   for (i in 1:nrow(my_grid)) {
     grid_building_area <- st_filter(my_buildings, my_grid$geometry[i], .predicate = st_intersects) %>% suppressMessages()
     grid_building_area_sum <- sum(grid_building_area$area_sqm, na.rm = T)
     grid_area <- c(grid_area, grid_building_area_sum)
+    print(i)
   }
   my_grid$area_sqm <- grid_area
+  
   return(my_grid)
 }
 
 
 
-
+clip_raster <- function(raster, polygon)  {
+  cropped_raster <- raster::crop(raster, extent(polygon))
+  masked_raster <- raster::mask(cropped_raster, polygon)
+  return(masked_raster)
+}
 
 
