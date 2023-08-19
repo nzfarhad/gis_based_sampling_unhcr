@@ -97,15 +97,15 @@ calculate_population <- function(raster){
 # }
 
 # Create Grid - crs 32642
-make_grid <- function(poly, cell_size = 100, my_crs = 32642) {
-  # planar coordinates for Afghanistan EPSG:32642
+make_grid <- function(poly, cell_size = 100, my_crs = 3857) {
+  # planar coordinates for Afghanistan EPSG:32642 and ESPG32641
   my_polygon <- st_transform(poly, crs = st_crs(my_crs))
   
   # Create the grid
   grid <- st_make_grid(my_polygon, cellsize = cell_size) %>%
     st_sf %>%
-    st_filter(my_polygon, .predicate = st_intersects)  %>% 
-    st_transform(crs = 4326)
+    st_filter(my_polygon, .predicate = st_intersects)  #%>%
+    # st_transform(crs = 4326)
   grid$Shape_Length <- round(as.numeric(st_length(grid$geometry)))
   grid$Shape_Area <- round(as.numeric(st_area(grid$geometry)))
   return(grid)
@@ -139,13 +139,12 @@ count_ppp <- function(my_grid, my_raster){
 }
 
 
-
 calculate_building_area_per_grid <- function(my_grid, my_buildings){
   
   grid_area <- vector()
   for (i in 1:nrow(my_grid)) {
-    grid_building_area <- st_filter(my_buildings, my_grid$geometry[i], .predicate = st_intersects) %>% suppressMessages()
-    grid_building_area_sum <- sum(grid_building_area$area_sqm, na.rm = T)
+    grid_building_area <- st_crop(my_buildings, my_grid$geometry[i]) %>% suppressMessages()
+    grid_building_area_sum <- round(sum(st_area(grid_building_area)),2) %>% as.numeric()
     grid_area <- c(grid_area, grid_building_area_sum)
     print(i)
   }
@@ -153,6 +152,20 @@ calculate_building_area_per_grid <- function(my_grid, my_buildings){
   
   return(my_grid)
 }
+
+# calculate_building_area_per_grid <- function(my_grid, my_buildings){
+#   
+#   grid_area <- vector()
+#   for (i in 1:nrow(my_grid)) {
+#     grid_building_area <- st_filter(my_buildings, my_grid$geometry[i], .predicate = st_intersects) %>% suppressMessages()
+#     grid_building_area_sum <- sum(grid_building_area$area_sqm, na.rm = T)
+#     grid_area <- c(grid_area, grid_building_area_sum)
+#     print(i)
+#   }
+#   my_grid$area_sqm <- grid_area
+#   
+#   return(my_grid)
+# }
 
 
 
