@@ -42,7 +42,7 @@ my_grid      <- make_grid(qala_e_naw, my_crs = 3857) %>% st_filter(af_buildings,
 my_buildings <- af_buildings_filtered
 
 # Step 5 - Add area field to the output of the intersection and calculate geometry in order to calculate square meter area of each building segment.
-my_buildings$area_sqm <- st_area(my_buildings$geometry) # %>% as.numeric()
+my_buildings$area_sqm <- round(st_area(my_buildings$geometry),2) # %>% as.numeric()
 
 
 # Step 6 and 7
