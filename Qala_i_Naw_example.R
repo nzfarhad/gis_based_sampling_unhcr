@@ -42,7 +42,7 @@ my_grid      <- make_grid(qala_e_naw, my_crs = 3857) %>% st_filter(af_buildings,
 my_buildings <- af_buildings_filtered
 
 # Step 5 - Add area field to the output of the intersection and calculate geometry in order to calculate square meter area of each building segment.
-my_buildings$area_sqm <- round(st_area(my_buildings$geometry),2) # %>% as.numeric()
+my_buildings$area_sqm <- round(st_area(my_buildings$geometry),2) %>% as.numeric()
 
 
 # Step 6 and 7
@@ -58,11 +58,11 @@ execution_time <- end_time - start_time
 
 
 # Step 8 - Calculate estimated population per cell 
-avarage_nr <- my_total_pop / sum(my_grid3$area_sqm) %>% as.numeric()
-my_grid3$population <- round(my_grid3$area_sqm *  avarage_nr, 0)
+avarage_nr <- my_total_pop / sum(my_grid2$area_sqm) %>% as.numeric()
+my_grid2$population <- round(my_grid2$area_sqm *  avarage_nr, 0)
 
 # Test
-sum(my_grid3$population)
+sum(my_grid2$population)
 my_total_pop
 
 
@@ -73,7 +73,7 @@ library(ggplot2)
 Sample <- sample_n(my_grid3, 4, weight = my_grid3$population) #%>% select(-c(Shape_Length))
 
 mapview(qala_e_naw, layer.name = "Qala-i-Naw",  alpha.regions = 0, col.regions = "grey") +
-  mapview::mapview(my_grid3, layer.name = "Grid Population",  zcol = "population", col.regions = colorRampPalette(c("yellow", "darkred"))(10)) +
+  mapview::mapview(my_grid2, layer.name = "Grid Population",  zcol = "population", col.regions = colorRampPalette(c("yellow", "darkred"))(10)) +
   mapview::mapview(Sample, col.regions = "blue") 
 
 
@@ -97,8 +97,11 @@ ggplot() +
        fill = "Population")
 
 
+saveRDS(my_grid2, "output/Qala_i_naw_analysis.RDS")
+st_write(my_grid2, "output/Qala_i_Naw/Shapefile/Qala_i_Naw_building_grid.shp")
+
 sum(from_Acr$population)
-sum(my_grid3$population)
+sum(my_grid4$population)
 
 summary(from_Acr$population)
-summary(my_grid3$population)
+summary(my_grid4$population)
