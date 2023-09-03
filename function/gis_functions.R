@@ -51,23 +51,26 @@ filter_district <- function(settlements, settlements_boundry_4326, af_buildings,
 
 # Settlement filter
 
-filter_settlment <- function(settlements, settlements_boundry_4326, af_buildings, raster1, my_id){
+filter_settlment <- function(settlements, settlements_boundry, af_buildings, raster1, my_id){
   
   settlements <- settlements %>% filter(Ref_FID %in% my_id)
-  settlements_boundry_4326 <- settlements_boundry_4326 %>% 
+  settlements_boundry <- settlements_boundry %>% 
     filter(Ref_FID %in% my_id)
   
-  # settlements_boundry_32642 <- st_transform(settlements_boundry_4326, crs = st_crs(32642))
+  # settlements_boundry_32642 <- st_transform(settlements_boundry, crs = st_crs(32642))
   # af_buildings <- st_transform(af_buildings, crs = st_crs(32642))
   
   af_buildings_filtered <- af_buildings %>% 
-    st_filter(settlements_boundry_4326, .predicate = st_intersects)
+    st_filter(settlements_boundry, .predicate = st_intersects)
   
+  settlements_boundry_4326 <- settlements_boundry %>% st_transform(crs = 4326)
+  
+  settlements_boundry_4326 <- settlements_boundry_4326 %>% st_transform(crs = 4326)
   cropped_raster <- raster::crop(raster1, extent(settlements_boundry_4326))
   masked_raster <- raster::mask(cropped_raster, settlements_boundry_4326)
   
   output_list <- list(settlements_filt = settlements,
-                      settlements_boundry_filt = settlements_boundry_4326,
+                      settlements_boundry_filt = settlements_boundry,
                       af_buildings_filt = af_buildings_filtered,
                       population_raster = masked_raster
   )
@@ -146,7 +149,6 @@ calculate_building_area_per_grid <- function(my_grid, my_buildings){
     grid_building_area <- st_crop(my_buildings, my_grid$geometry[i]) %>% suppressMessages()
     grid_building_area_sum <- round(sum(st_area(grid_building_area)),2) %>% as.numeric()
     grid_area <- c(grid_area, grid_building_area_sum)
-    print(i)
   }
   my_grid$area_sqm <- grid_area
   
